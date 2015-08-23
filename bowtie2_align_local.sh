@@ -8,4 +8,6 @@ echo $i.sam sorted into $i.sorted | tee -a bowtie3_align_local.log
 bedtools bamtobed -i $i.sorted.bam > $i.bed | tee -a bowtie3_align_local.log 
 echo $i.bam converted to $i.bed | tee -a bowtie3_align_local.log
 rm $i.sam $i.sorted.bam
+mkdir ./alignments
+mv $i.bed ./alightments/
 done
