@@ -1,7 +1,9 @@
 #!/bin/sh
 ## Extract unalign coordinates from promer or nucmer mapping
 ## using GFF. NB: If using bacterial GFF with `mapview`,
-## replace `CDS` with `single-exon`
+## replace CDS with single-exon sed -i s/CDS/single-exon/g
+## Aroon Chande, Hammer Lab
+
 length=$(wc -l $1 | awk '{print $1}')
 echo $length
 i=1
