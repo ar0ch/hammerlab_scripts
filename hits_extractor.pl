@@ -45,18 +45,17 @@ EXIT STATUS
 EOF
 }
 my $h=0;
-my $threads=10
+my $threads=10;
 my ($hmmDir,$protDir,$outdir,$hmmFile,$protFile,$outfile,$prots,@prots,%prots,@hits);
 $prots = '';
 if (@ARGV < 1){print_usage();exit 1;}
-GetOptions ('hmm=s' => \$hmmDir, 'prot=s' => \$protDir, 'o=s' => \$outdir, 'h' => \$h, 't=i' => \$thread);
+GetOptions ('hmm=s' => \$hmmDir, 'prot=s' => \$protDir, 'o=s' => \$outdir, 'h' => \$h, 't=i' => \$threads);
 if (eval $h){ print_usage();exit 1;}
 my $manager = Parallel::ForkManager -> new ( $threads );
 opendir DIR, $hmmDir or die "cannot open dir $hmmDir: $!";
 my @file= readdir DIR;
 closedir DIR;
 foreach (@file){
-	$manager->start and next;
 	@hits = ( );
 	$prots = '';
 	%prots = (	);
@@ -91,6 +90,7 @@ foreach (@file){
 		close HMM;
 		open OUT, ">$outfile" or die "Cannot open $outfile: $!\n";
 		foreach my $hit (@hits){
+			$manager->start and next;
 			open RPS, '>rpstemp' or die "Cannot open rpstemp: $!";
 			print RPS ">$hit\n$prots{$hit}\n";
 			close RPS;
@@ -101,11 +101,11 @@ foreach (@file){
 				if ($columns[1] =~ /226032|274542|261044|260130|250847|226199|223187|197609|182849|178040|273628|255682|254315|226200|212030|184001|177427/){
 					print OUT ">$hit\n$prots{$hit}\n";}
 				else{next;}}
+			$manager->finish;
 			}
 			close RPSR;
 		close OUT;
 		}
-	$manager->finish;
 	}
 	else {next;}
 }
