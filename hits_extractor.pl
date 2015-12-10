@@ -47,13 +47,11 @@ EXIT STATUS
 
 EOF
 }
-my $h=0;
-my $threads=10;
-my $type='all';
+my ($h,$append,$threads,$type)=('0','0','10','all');
 my ($hmmDir,$protDir,$outdir,$hmmFile,$protFile,$outfile,$prots,@prots,%prots,@hits);
 $prots = '';
 if (@ARGV < 1){print_usage();exit 1;}
-GetOptions ('hmm=s' => \$hmmDir, 'prot=s' => \$protDir, 'o=s' => \$outdir, 'h' => \$h, 't=i' => \$threads,'type=s' => \$type);
+GetOptions ('hmm=s' => \$hmmDir, 'prot=s' => \$protDir, 'o=s' => \$outdir, 'h' => \$h, 't=i' => \$threads,'type=s' => \$type, 	'a' => \$append);
 if (eval $h){ print_usage();exit 1;}
 my $manager = Parallel::ForkManager -> new ( $threads );
 opendir DIR, $hmmDir or die "cannot open dir $hmmDir: $!";
@@ -92,7 +90,8 @@ foreach (@file){
 				}
 		}
 		close HMM;
-		open OUT, ">$outfile" or die "Cannot open $outfile: $!\n";
+                if ($append){open OUT, ">>$outfile" or die "Cannot open $outfile: $!\n";}
+                else {open OUT, ">$outfile" or die "Cannot open $outfile: $!\n";}
 		foreach my $hit (@hits){
 			$manager->start and next;
 			my $rpstemp=temp_filename();
