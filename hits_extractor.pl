@@ -102,36 +102,36 @@ foreach (@file){
 			open RPSR, "$rpsresulttemp" or die "Cannot open $rpsresulttemp: $!";
 			foreach (<RPSR>){	
 				my @columns = split(/\s+/,$_);
-				if($type == "all"){
-				if ($columns[1] =~ /226032|274542|261044|260130|250847|226199|223187|197609|182849|178040|273628|255682|254315|226200|212030|184001|177427/){
-					print OUT ">$hit\n$prots{$hit}\n";
-				}}	
-				elsif ($type == "lipase"){
+				if($type eq "all"){
+					if ($columns[1] =~ /226032|274542|261044|260130|250847|226199|223187|197609|182849|178040|273628|255682|254315|226200|212030|184001|177427/){
+						print OUT ">$hit\n$prots{$hit}\n";
+					}}	
+				elsif ($type eq "lipase"){
 					if ($columns[1] =~ /250847|254315|226200/){
-					print OUT ">$hit\n$prots{$hit}\n";
-				}}
-				elsif($type == "hydrolase"){
+					print OUT ">$hit\n$prots{$hit}\n";}
+				}
+				elsif($type eq "hydrolase"){
 					if ($columns[1] =~ /255682|226199|178040|182849|177427/){
 						print OUT ">$hit\n$prots{$hit}\n"
-				}}
-				elsif($type == "lysm"){
+					}}
+				elsif($type eq "lysm"){
 					if ($columns[1] =~ /212030|197609/){
 						print OUT ">$hit\n$prots{$hit}\n"
-				}}
+					}}
 				elsif($type =~ /ntpase|transferase/){
 					if ($columns[1] =~ /260130|227061|224093|223187|273628|224228|184001/){
 						print OUT ">$hit\n$prots{$hit}\n"
-				}}
-				elsif($type == "unknown"){
+					}}
+				elsif($type eq "unknown"){
 					print OUT ">$hit\n$prots{$hit}\n"
-				}
+					}
 				else{next;}}
-			$manager->finish;
-			}
+				$manager->finish;
+				}
 			close RPSR;
 		close OUT;
-		}
-	}
+		
+	}	
 	else {next;}
 }
 $manager->wait_all_children;
