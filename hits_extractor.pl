@@ -32,7 +32,7 @@ OPTIONS
   -o    di		 Dumps extracted seqs to specifed directory
   -prot	dir		Directory containing protein files in .faa format
 			Protein and hmm file must have same basename
-  -threads	int	Number of threads for rps-bpast stage. Default: 10
+  -t	int		Number of threads for rps-bpast stage. Default: 10
   -type	str		Type of effector to verify. Default: all, types:
 			all,hydrolase,lipase,lysm,ntpase,transferase,unknown
 
