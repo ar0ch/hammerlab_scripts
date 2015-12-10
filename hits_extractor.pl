@@ -121,3 +121,19 @@ sub temp_filename{
 	        DIR      => '/tmp/',
 	    );
 	}
+###
+##!/usr/bin/bash
+#for i in $(ls *.hmm);do;
+#l=$(echo $i|  cut -c 17- | rev | cut -c 5- | rev )
+#echo "";echo $l
+#for j in $(ls ./Proteins/*.faa);do;
+#k=$(echo $j| cut -c 12-)
+#mkdir -p $l.out
+#hmmscan --cpu 12 --tblout ./$l.out/$k.txt -o ./$l.out/$k.out $i $j
+#echo -n "."
+#done
+#echo ""
+#for i in $(ls | grep ".out");do
+#./extractor.pl -hmm $i -prot ./Proteins -o  ./out -a
+#done
+#done
