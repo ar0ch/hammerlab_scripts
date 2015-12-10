@@ -8,10 +8,10 @@
 # k=$(echo $j| cut -c 12-);l=$(echo $i| rev| cut -c 5- | rev);\
 # echo $k;echo $l_out;hmmscan --tblout ./$l.out/$k.txt -o \
 # $l.out/$l_$k.out $i $j;done;done
-
 use strict;
 use Getopt::Long;
 use File::Basename;
+use Parallel::ForkManager;
 my $prog = basename($0);
 sub print_usage
 {
@@ -45,16 +45,22 @@ EXIT STATUS
 EOF
 }
 my $h=0;
+my $threads=10
 my ($hmmDir,$protDir,$outdir,$hmmFile,$protFile,$outfile,$prots,@prots,%prots,@hits);
 $prots = '';
 if (@ARGV < 1){print_usage();exit 1;}
-GetOptions ('hmm=s' => \$hmmDir, 'prot=s' => \$protDir, 'o=s' => \$outdir, 'h' => \$h );
+GetOptions ('hmm=s' => \$hmmDir, 'prot=s' => \$protDir, 'o=s' => \$outdir, 'h' => \$h, 't=i' => \$thread);
 if (eval $h){ print_usage();exit 1;}
+my $manager = Parallel::ForkManager -> new ( $threads );
 opendir DIR, $hmmDir or die "cannot open dir $hmmDir: $!";
 my @file= readdir DIR;
 closedir DIR;
 foreach (@file){
-	if ($_ =~ /.txt/){
+	$manager->start and next;
+	@hits = ( );
+	$prots = '';
+	%prots = (	);
+	if ($_ =~ /.txt$/){
 		$hmmFile = join('/',$hmmDir,$_);
 		$_ =~ s/\.txt//g;
 		$protFile = join('/',$protDir,$_);
@@ -68,8 +74,8 @@ foreach (@file){
 		@prots = split(/\>/,$prots);
 		shift @prots;
 		foreach (@prots){
-			my($first, $last) = split(/\r?\n/,$_,2);
-			$prots{$first} = $last;
+			my($desc, $seq) = split(/\r?\n/,$_,2);
+			$prots{$desc} = $seq;
 		}
 
 		open HMM, $hmmFile or die "Cannot open $hmmFile: $!\n";
@@ -84,9 +90,24 @@ foreach (@file){
 		}
 		close HMM;
 		open OUT, ">$outfile" or die "Cannot open $outfile: $!\n";
-		foreach (@hits){
-			print OUT ">$_\n$prots{$_}\n"
+		foreach my $hit (@hits){
+			open RPS, '>rpstemp' or die "Cannot open rpstemp: $!";
+			print RPS ">$hit\n$prots{$hit}\n";
+			close RPS;
+			`rpsblast -db /home/achande3/bin/db/cdd/Cdd -max_target_seqs 1 -outfmt "6" -out rpsresulttemp <rpstemp`;
+			open RPSR, 'rpsresulttemp' or die "Cannot open rpsresulttemp: $!";
+			foreach (<RPSR>){	
+				my @columns = split(/\s+/,$_);
+				if ($columns[1] =~ /226032|274542|261044|260130|250847|226199|223187|197609|182849|178040|273628|255682|254315|226200|212030|184001|177427/){
+					print OUT ">$hit\n$prots{$hit}\n";}
+				else{next;}}
+			}
+			close RPSR;
+		close OUT;
 		}
+	$manager->finish;
 	}
 	else {next;}
 }
+$manager->wait_all_children;
+exit 0;
