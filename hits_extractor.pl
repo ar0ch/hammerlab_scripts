@@ -27,12 +27,14 @@ DESCRIPTION
   output is also accepted. 
 
 OPTIONS
-  -h            Print this help message
-  -hmm	dir		Directory containing HMMscan output in tab delim
-				format
-  -o    dir     Dumps extracted seqs to specifed directory
+  -h    		Print this help message
+  -hmm	dir		Directory with tab delimited HMMscan output
+  -o    di		 Dumps extracted seqs to specifed directory
   -prot	dir		Directory containing protein files in .faa format
-				Protein and hmm file must have same basename
+			Protein and hmm file must have same basename
+  -threads	int	Number of threads for rps-bpast stage. Default: 10
+  -type	str		Type of effector to verify. Default: all, types:
+			all,hydrolase,lipase,lysm,ntpase,transferase,unknown
 
 
 EXAMPLES
