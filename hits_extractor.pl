@@ -47,10 +47,11 @@ EOF
 }
 my $h=0;
 my $threads=10;
+my $type='all';
 my ($hmmDir,$protDir,$outdir,$hmmFile,$protFile,$outfile,$prots,@prots,%prots,@hits);
 $prots = '';
 if (@ARGV < 1){print_usage();exit 1;}
-GetOptions ('hmm=s' => \$hmmDir, 'prot=s' => \$protDir, 'o=s' => \$outdir, 'h' => \$h, 't=i' => \$threads);
+GetOptions ('hmm=s' => \$hmmDir, 'prot=s' => \$protDir, 'o=s' => \$outdir, 'h' => \$h, 't=i' => \$threads,'type=s' => \$type);
 if (eval $h){ print_usage();exit 1;}
 my $manager = Parallel::ForkManager -> new ( $threads );
 opendir DIR, $hmmDir or die "cannot open dir $hmmDir: $!";
@@ -101,8 +102,29 @@ foreach (@file){
 			open RPSR, "$rpsresulttemp" or die "Cannot open $rpsresulttemp: $!";
 			foreach (<RPSR>){	
 				my @columns = split(/\s+/,$_);
+				if($type == "all"){
 				if ($columns[1] =~ /226032|274542|261044|260130|250847|226199|223187|197609|182849|178040|273628|255682|254315|226200|212030|184001|177427/){
-					print OUT ">$hit\n$prots{$hit}\n";}
+					print OUT ">$hit\n$prots{$hit}\n";
+				}}	
+				elsif ($type == "lipase"){
+					if ($columns[1] =~ /250847|254315|226200/){
+					print OUT ">$hit\n$prots{$hit}\n";
+				}}
+				elsif($type == "hydrolase"){
+					if ($columns[1] =~ /255682|226199|178040|182849|177427/){
+						print OUT ">$hit\n$prots{$hit}\n"
+				}}
+				elsif($type == "lysm"){
+					if ($columns[1] =~ /212030|197609/){
+						print OUT ">$hit\n$prots{$hit}\n"
+				}}
+				elsif($type =~ /ntpase|transferase/){
+					if ($columns[1] =~ /260130|227061|224093|223187|273628|224228|184001/){
+						print OUT ">$hit\n$prots{$hit}\n"
+				}}
+				elsif($type == "unknown"){
+					print OUT ">$hit\n$prots{$hit}\n"
+				}
 				else{next;}}
 			$manager->finish;
 			}
