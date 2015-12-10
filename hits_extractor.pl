@@ -11,6 +11,7 @@
 use strict;
 use Getopt::Long;
 use File::Basename;
+use File::Temp;
 use Parallel::ForkManager;
 my $prog = basename($0);
 sub print_usage
@@ -91,11 +92,13 @@ foreach (@file){
 		open OUT, ">$outfile" or die "Cannot open $outfile: $!\n";
 		foreach my $hit (@hits){
 			$manager->start and next;
-			open RPS, '>rpstemp' or die "Cannot open rpstemp: $!";
+			my $rpstemp=temp_filename();
+			my $rpsresulttemp=temp_filename();
+			open RPS, ">$rpstemp" or die "Cannot open $rpstemp: $!";
 			print RPS ">$hit\n$prots{$hit}\n";
 			close RPS;
-			`rpsblast -db /home/achande3/bin/db/cdd/Cdd -max_target_seqs 1 -outfmt "6" -out rpsresulttemp <rpstemp`;
-			open RPSR, 'rpsresulttemp' or die "Cannot open rpsresulttemp: $!";
+			`rpsblast -db /home/achande3/bin/db/cdd/Cdd -max_target_seqs 1 -outfmt "6" -out $rpsresulttemp -query $rpstemp`;
+			open RPSR, "$rpsresulttemp" or die "Cannot open $rpsresulttemp: $!";
 			foreach (<RPSR>){	
 				my @columns = split(/\s+/,$_);
 				if ($columns[1] =~ /226032|274542|261044|260130|250847|226199|223187|197609|182849|178040|273628|255682|254315|226200|212030|184001|177427/){
@@ -111,3 +114,10 @@ foreach (@file){
 }
 $manager->wait_all_children;
 exit 0;
+##################
+sub temp_filename{
+	    my $file = File::Temp->new(
+	        TEMPLATE => 'tempXXXXX',
+	        DIR      => '/tmp/',
+	    );
+	}
