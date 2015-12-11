@@ -13,10 +13,9 @@ my $h=0;
 GetOptions ( 'prot=s' => \$protDir, 'o=s' => \$outDir, 'h' => \$h,);
 if (eval $h){ print_usage();exit 1;}
 my @file = glob ( "$protDir/*" );
-#shift @file;
+
 foreach (@file){print "$_\n";}
-#open OUT, >$outfile or die "Cannot open file, $outfile; $!\n";
-#system(`mkdir -p $outDir`) or die "Cannot make $outDir: $!\n";
+
 for($row=0; $row<@file;$row++){
 	for($col=$row+1; $col<@file;$col++){
 		my $out = temp_filename();
@@ -35,12 +34,6 @@ for($row=0; $row<@file;$row++){
 		$matrix{$colName}{$rowName}= $id;
 		$matrix{$rowName}{$rowName} = 0;
 		$matrix{$colName}{$colName} = 0;
-		# LEGACY CODE FROM WHAT_MATRIX.SH
-		# my $awk = `awk 'FNR == 19{printf $2" "}; FNR==26{print $2" "}; FNR==20{printf $2" "}'  $out  | tr -d '()' |  sed s'|/| |'g`;
-		# my @awk = split(/\s+/,$awk);
-		# $matrix[$row] = chomp $awk[0];
-		# $matrix[$col] = chomp $awk[1];
-		# $matrix[$row][$col]= 1-($awk[2]/$awk[3);
 		}
 }
 
