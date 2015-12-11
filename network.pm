@@ -2,10 +2,10 @@
 # Aroon Chande
 # Prepare files for network analysis
 use strict;
+use Math::Combinatorics;
 use Getopt::Long;
 use File::Basename;
 use File::Temp;
-use network.pm;
 my $prog = basename($0);
 my($max,$protDir,$outDir,$row,$col,%matrix);
 if (@ARGV < 1){print_usage();exit 1;}
@@ -87,4 +87,11 @@ EXIT STATUS
   >0    An error occurred
 EOF
 }
- 
+sub temp_filename{
+	    my $file = File::Temp->new(
+	        TEMPLATE => 'tempXXXXX',
+	        DIR      => '/tmp/',
+	    );
+	}
+
+	
