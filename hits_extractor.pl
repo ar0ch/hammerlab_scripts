@@ -23,11 +23,12 @@ if($scan){
 	my @prots = glob ( "$protDir/*.faa" );
 	foreach my $hmm (@hmms){
 		my $base = basename($hmm);
-		print STDERR "$base\n[";
+		$base =~ s/\.hmm$//g;
+		print STDERR "Running hmmscans:\n$base\n[";
 		my $tblout = join('.',$base,"out");
 		system(`mkdir -p $outdir/$tblout`) or die "Cannot create directory: $outdir/$tblout\n";
 		foreach my $pr (@prots){
-			my $protOut = basename($pr);
+			my $protOut = join('.',basename($pr),"txt");
 			my $out = temp_filename();
 			system(`hmmscan --cpu $threads -o $out --tblout $outdir/$tblout/$protOut $hmm $pr`) or die "Cannot parse an input option: $!\n";
 			print STDERR ".";
@@ -38,6 +39,7 @@ if($scan){
 opendir DIR, $inDir or die "cannot open dir $inDir: $!";
 my @file= readdir DIR;
 closedir DIR;
+print "Extracting and verifying hits, filtering by $type\n";
 foreach (@file){
 	@hits = ( );
 	$prots = '';
@@ -72,24 +74,24 @@ foreach (@file){
 				}
 		}
 		close HMM;
+		system(`mkdir -p $outdir`);
 		if ($summary && $append){
 			open OUT, ">>$outfile" or die "Cannot open $outfile: $!\n";
-			open HY, ">>$outdir/hydrolase.summary,txt" or die "Cannot open $outfile: $!\n";
+			open HY, ">>$outdir/hydrolase.summary.txt" or die "Cannot open $outfile: $!\n";
 			open LI, ">>$outdir/lipase.summary.txt" or die "Cannot open $outfile: $!\n";
 			open LY, ">>$outdir/lysm.summary.txt" or die "Cannot open $outfile: $!\n";
 			open NT, ">>$outdir/ntpase.transferase.summary.txt" or die "Cannot open $outfile: $!\n";
 			open UN, ">>$outdir/unknown.summary.txt" or die "Cannot open $outfile: $!\n";
 			}
 		elsif ($summary) {
-			open OUT, ">$outdir/hydrolase.summary,txt" or die "Cannot open $outfile: $!\n";
+			open OUT, ">$outdir/hydrolase.summary.txt" or die "Cannot open $outfile: $!\n";
 			open OUT, ">$outdir/lipase.summary.txt" or die "Cannot open $outfile: $!\n";
 			open OUT, ">$outdir/lysm.summary.txt" or die "Cannot open $outfile: $!\n";
 			open OUT, ">$outdir/ntpase.transferase.summary.txt" or die "Cannot open $outfile: $!\n";
 			open OUT, ">$outdir/unknown.summary.txt" or die "Cannot open $outfile: $!\n";
 			}
-		elsif ($append){open OUT, ">>$outdir/hydrolase.summary,txt" or die "Cannot open $outfile: $!\n";}
-
-		else{open OUT, ">$outdir/hydrolase.summary,txt" or die "Cannot open $outfile: $!\n";}		
+		elsif ($append){open OUT, ">>$outfile" or die "Cannot open $outfile: $!\n";}
+		else{open OUT, ">$outfile" or die "Cannot open $outfile: $!\n";}		
 		foreach my $hit (@hits){
 			$manager->start and next;
 			my $rpstemp=temp_filename();
