@@ -14,7 +14,7 @@ my ($h,$append,$threads,$type,$scan,$summary)=('0','0','10','all','0','0');
 my ($inDir,$hmmDir,$protDir,$outdir,$hmmFile,$protFile,$outfile,$prots,@prots,%prots,@hits);
 $prots = '';
 if (@ARGV < 1){print_usage();exit 1;}
-GetOptions ('hmm=s' => \$hmmDir, 'in=s' => \$inDir 'prot=s' => \$protDir, 'o=s' => \$outdir, 'h' => \$h, 't=i' => \$threads,'type=s' => \$type, 	'a' => \$append, 'scan' => \$scan);
+GetOptions ('hmm=s' => \$hmmDir, 'in=s' => \$inDir, 'prot=s' => \$protDir, 'o=s' => \$outdir, 'h' => \$h, 't=i' => \$threads,'type=s' => \$type, 	'a' => \$append, 'scan' => \$scan);
 if (eval $h){ print_usage();exit 1;}
 my $manager = Parallel::ForkManager -> new ( $threads );
 
@@ -25,11 +25,11 @@ if($scan){
 		my $base = basename($hmm);
 		print STDERR "$base\n[";
 		my $tblout = join('.',$base,"out");
-		system(`mkdir -p $outdir/$tblout`);
+		system(`mkdir -p $outdir/$tblout`) or die "Cannot create directory: $outdir/$tblout\n";
 		foreach my $pr (@prots){
 			my $protOut = basename($pr);
 			my $out = temp_filename();
-			system(`hmmscan --cpu $threads -o $out --tblout $outdir/$tblout/$protOut $hmm $pr`);
+			system(`hmmscan --cpu $threads -o $out --tblout $outdir/$tblout/$protOut $hmm $pr`) or die "Cannot parse an input option: $!\n";
 			print STDERR ".";
 		}
 		print STDERR "]\n";
