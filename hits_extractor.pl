@@ -19,7 +19,7 @@ if (eval $h){ print_usage();exit 1;}
 my $manager = Parallel::ForkManager -> new ( $threads );
 
 if($scan){
-	my @hmms = glob ( "$hmmDir/*.hmm" );
+		my @hmms = glob ( "$hmmDir/*.hmm" );
 	my @prots = glob ( "$protDir/*.faa" );
 	foreach my $hmm (@hmms){
 		my $base = basename($hmm);
@@ -27,6 +27,7 @@ if($scan){
 		print STDERR "Running hmmscans:\n$base\n[";
 		my $tblout = join('.',$base,"out");
 		system(`mkdir -p $outdir/$tblout`) or die "Cannot create directory: $outdir/$tblout\n";
+		$inDir="$outdir/$tblout/";
 		foreach my $pr (@prots){
 			my $protOut = join('.',basename($pr),"txt");
 			my $out = temp_filename();
@@ -156,14 +157,17 @@ DESCRIPTION
   output is also accepted. 
 
 OPTIONS
+  -a			Append data to same protein.faa file
   -h    		Print this help message
-  -hmm	dir		Directory with tab delimited HMMscan output
+  -hmm	dir		Directory containing hmm profiles (profile.hmm)
+  -in	dir		Directory with tab delimited HMMscan output
   -o    dir		Dumps extracted seqs to specifed directory
   -prot	dir		Directory containing protein files in .faa format
-			Protein and hmm file must have same basename
+				Protein and hmm file must have same basename
+  -scan 		Run hmmscan, requires -hmm. If set, -in is ignored
   -t	int		Number of threads for rps-blast stage. Default: 10
   -type	str		Type of effector to verify. Default: all; types:
-			all,hydrolase,lipase,lysm,ntpase,transferase,unknown
+				all,hydrolase,lipase,lysm,ntpase,transferase,unknown
 
 
 EXAMPLES
@@ -183,19 +187,3 @@ sub temp_filename{
 	        DIR      => '/tmp/',
 	    );
 	}
-###
-##!/usr/bin/bash
-#for i in $(ls *.hmm);do;
-#l=$(echo $i|  cut -c 17- | rev | cut -c 5- | rev )
-#echo "";echo $l
-#for j in $(ls ./Proteins/*.faa);do;
-#k=$(echo $j| cut -c 12-)
-#mkdir -p $l.out
-#hmmscan --cpu 12 --tblout ./$l.out/$k.txt -o ./$l.out/$k.out $i $j
-#echo -n "."
-#done
-#echo ""
-#for i in $(ls | grep ".out");do
-#./extractor.pl -hmm $i -prot ./Proteins -o  ./out -a
-#done
-#done
