@@ -3,25 +3,35 @@
 # Extracted HMM profiled proteins from a proteins.faa file
 # Input os output of  hmmscan --tblout
 # ./protein_extractor.pl -hmm hmmdir -prot proteindir -o outdir
-# For hmmscan batch jobs:
-# for i in $(ls *.hmm);do; for j in $(ls ./Proteins/*.faa);do;\
-# k=$(echo $j| cut -c 12-);l=$(echo $i| rev| cut -c 5- | rev);\
-# echo $k;echo $l_out;hmmscan --tblout ./$l.out/$k.txt -o \
-# $l.out/$l_$k.out $i $j;done;done
 use strict;
 use Getopt::Long;
 use File::Basename;
 use File::Temp;
 use Parallel::ForkManager;
-user network.pm;
+#use network.pm;
 my $prog = basename($0);
-my ($h,$append,$threads,$type)=('0','0','10','all');
+my ($h,$append,$threads,$type,$scan,$summary)=('0','0','10','all','0','0');
 my ($hmmDir,$protDir,$outdir,$hmmFile,$protFile,$outfile,$prots,@prots,%prots,@hits);
 $prots = '';
 if (@ARGV < 1){print_usage();exit 1;}
-GetOptions ('hmm=s' => \$hmmDir, 'prot=s' => \$protDir, 'o=s' => \$outdir, 'h' => \$h, 't=i' => \$threads,'type=s' => \$type, 	'a' => \$append);
+GetOptions ('hmm=s' => \$hmmDir, 'prot=s' => \$protDir, 'o=s' => \$outdir, 'h' => \$h, 't=i' => \$threads,'type=s' => \$type, 	'a' => \$append, 'scan' => \$scan);
 if (eval $h){ print_usage();exit 1;}
 my $manager = Parallel::ForkManager -> new ( $threads );
+
+if($scan){
+	my @hmms = glob ( "$hmmDir/*.hmm" );
+	my @prots = glob ( "$protDir/*.faa" );
+	foreach my $hmm (@hmms){
+		my $base = basename($hmm);
+		my $tblout = join('.',$base,"out");
+		system(`mkdir -p $outdir/$tblout`);
+		foreach my $pr (@prots){
+		my $protOut = basename($pr);
+		my $out = temp_filename();
+		system(`hmmscan --cpu $threads -o $out --tblout $outdir/$tblout/$protOut $hmm $pr`);
+		}
+	}
+}
 opendir DIR, $hmmDir or die "cannot open dir $hmmDir: $!";
 my @file= readdir DIR;
 closedir DIR;
@@ -100,21 +110,21 @@ foreach (@file){
 				}
 				elsif($type eq "hydrolase"){
 					if ($columns[1] =~ /255682|226199|178040|182849|177427/){
-						print OUT ">$hit\n$prots{$hit}\n"
+						print OUT ">$hit\n$prots{$hit}\n";
 						print HY ">$hit\n$prots{$hit}\n";
 					}}
 				elsif($type eq "lysm"){
 					if ($columns[1] =~ /212030|197609/){
-						print OUT ">$hit\n$prots{$hit}\n"
+						print OUT ">$hit\n$prots{$hit}\n";
 						print LY ">$hit\n$prots{$hit}\n";
 					}}
 				elsif($type =~ /ntpase|transferase/){
 					if ($columns[1] =~ /260130|227061|224093|223187|273628|224228|184001/){
-						print OUT ">$hit\n$prots{$hit}\n"
+						print OUT ">$hit\n$prots{$hit}\n";
 						print NT ">$hit\n$prots{$hit}\n";
 					}}
 				elsif($type eq "unknown"){
-					print OUT ">$hit\n$prots{$hit}\n"
+					print OUT ">$hit\n$prots{$hit}\n";
 					print UN ">$hit\n$prots{$hit}\n";
 					}
 				else{next;}}
@@ -129,8 +139,7 @@ foreach (@file){
 $manager->wait_all_children;
 exit 0;
 ##################
-sub print_usage
-{
+sub print_usage{
     warn <<"EOF";
 
 USAGE
@@ -162,6 +171,7 @@ EXIT STATUS
 
 EOF
 }
+
 sub temp_filename{
 	    my $file = File::Temp->new(
 	        TEMPLATE => 'tempXXXXX',
