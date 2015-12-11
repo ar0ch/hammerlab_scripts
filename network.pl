@@ -70,11 +70,13 @@ USAGE
   $prog -prot <protdir> [options]
 DESCRIPTION
   This program builds a matrix of sequence identity and exports
-  a tsv in sytoscape importable format. Input files must be not
-  be multifasta. Description line should preferably contain no spaces
+  a tsv in cytoscape importable format. Input files must be not
+  be multifasta. 
 OPTIONS
   -h    		Print this help message
   -prot	dir		Directory containing protein files in fasta format
+  			Description line should be formatted as shown:
+  			>Strain_locus_function
   -outmat str		Output file for matrix
   -tsv	  str		Output file for nodes TSV for cytoscape import
 EXAMPLES
