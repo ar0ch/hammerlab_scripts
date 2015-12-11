@@ -13,40 +13,8 @@ use Getopt::Long;
 use File::Basename;
 use File::Temp;
 use Parallel::ForkManager;
+user network.pm;
 my $prog = basename($0);
-sub print_usage
-{
-    warn <<"EOF";
-
-USAGE
-  $prog -hmm <hmmdir> -prot <protdir> -o <outdir>
-
-DESCRIPTION
-  This program extracts the hits from an `hmmscan` file
-  hmmscan must be run with `--tblout`. Other hmm* profiling
-  output is also accepted. 
-
-OPTIONS
-  -h    		Print this help message
-  -hmm	dir		Directory with tab delimited HMMscan output
-  -o    dir		Dumps extracted seqs to specifed directory
-  -prot	dir		Directory containing protein files in .faa format
-			Protein and hmm file must have same basename
-  -t	int		Number of threads for rps-blast stage. Default: 10
-  -type	str		Type of effector to verify. Default: all; types:
-			all,hydrolase,lipase,lysm,ntpase,transferase,unknown
-
-
-EXAMPLES
-  $prog -hmm hmmscan_vgrg -prot reference_prots -o hits_out
-  $prog -h
-
-EXIT STATUS
-  0     Successful completion
-  >0    An error occurred
-
-EOF
-}
 my ($h,$append,$threads,$type)=('0','0','10','all');
 my ($hmmDir,$protDir,$outdir,$hmmFile,$protFile,$outfile,$prots,@prots,%prots,@hits);
 $prots = '';
@@ -161,6 +129,39 @@ foreach (@file){
 $manager->wait_all_children;
 exit 0;
 ##################
+sub print_usage
+{
+    warn <<"EOF";
+
+USAGE
+  $prog -hmm <hmmdir> -prot <protdir> -o <outdir>
+
+DESCRIPTION
+  This program extracts the hits from an `hmmscan` file
+  hmmscan must be run with `--tblout`. Other hmm* profiling
+  output is also accepted. 
+
+OPTIONS
+  -h    		Print this help message
+  -hmm	dir		Directory with tab delimited HMMscan output
+  -o    dir		Dumps extracted seqs to specifed directory
+  -prot	dir		Directory containing protein files in .faa format
+			Protein and hmm file must have same basename
+  -t	int		Number of threads for rps-blast stage. Default: 10
+  -type	str		Type of effector to verify. Default: all; types:
+			all,hydrolase,lipase,lysm,ntpase,transferase,unknown
+
+
+EXAMPLES
+  $prog -hmm hmmscan_vgrg -prot reference_prots -o hits_out
+  $prog -h
+
+EXIT STATUS
+  0     Successful completion
+  >0    An error occurred
+
+EOF
+}
 sub temp_filename{
 	    my $file = File::Temp->new(
 	        TEMPLATE => 'tempXXXXX',
