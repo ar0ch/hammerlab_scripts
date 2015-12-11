@@ -9,13 +9,10 @@ use File::Temp;
 my $prog = basename($0);
 my($max,$protDir,$outDir,$row,$col,%matrix);
 if (@ARGV < 1){print_usage();exit 1;}
-my $h=0;
-GetOptions ( 'prot=s' => \$protDir, 'o=s' => \$outDir, 'h' => \$h,);
+my ($h,$outmat,$tsv)=('0','matrix.tsv','nodes.tsv');
+GetOptions ( 'prot=s' => \$protDir, 'o=s' => \$outDir, 'h' => \$h, 'outmat=s' => \$outmat, 'tsv=s' => \$tsv);
 if (eval $h){ print_usage();exit 1;}
 my @file = glob ( "$protDir/*" );
-
-foreach (@file){print "$_\n";}
-
 for($row=0; $row<@file;$row++){
 	for($col=$row+1; $col<@file;$col++){
 		my $out = temp_filename();
@@ -38,7 +35,7 @@ for($row=0; $row<@file;$row++){
 }
 
 my @nodes = sort keys %matrix;
-open MAT, ">mat.tsv" or die "Cannot create output file mat.tsv: $!\n";
+open MAT, ">$outmat" or die "Cannot open $outmat: $!\n";
 for (my $col = 0; $col < @nodes; $col++){
 	print MAT "\t$nodes[$col]";
 }
@@ -53,7 +50,7 @@ for (my $row = 0; $row < @nodes; $row++){
 
 close MAT;
 
-open NODE, ">nodes.tsv" or die "Cannot create output file nodes.tsv: $!\n";
+open NODE, ">$tsv" or die "Cannot open $tsv: $!\n";
 print NODE "node1\tc1\tt1\tdist\tnode2\tc2\tt2\n";
 for (my $row = 0; $row < @nodes; $row++){
 	my (undef, $c1, $t1) = split(/_/, $nodes[$row]);
@@ -70,16 +67,18 @@ sub print_usage
 {
     warn <<"EOF";
 USAGE
-  $prog -prot <protdir>
+  $prog -prot <protdir> [options]
 DESCRIPTION
   This program builds a matrix of sequence identity and exports
   a tsv in sytoscape importable format. Input files must be not
   be multifasta. Description line should preferably contain no spaces
 OPTIONS
   -h    		Print this help message
-  -prot	dir		Directory containing protein files in .faa format
+  -prot	dir		Directory containing protein files in fasta format
+  -outmat str		Output file for matrix
+  -tsv	  str		Output file for nodes TSV for cytoscape import
 EXAMPLES
-  $prog -prot aux1/tap/ 
+  $prog -prot aux1/tap/ -outmat aux1.tap.matrix.tsv -tsv aux1.tap.tsv
   $prog -h
 EXIT STATUS
   0     Successful completion
