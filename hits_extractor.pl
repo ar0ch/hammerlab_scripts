@@ -8,6 +8,7 @@ use Getopt::Long;
 use File::Basename;
 use File::Temp;
 use Parallel::ForkManager;
+use Pod::Usage;
 #use network.pm;
 my $prog = basename($0);
 my ($h,$append,$threads,$type,$scan,$summary)=('0','0','10','all','0','0');
@@ -15,6 +16,7 @@ my ($inDir,$hmmDir,$protDir,$outdir,$hmmFile,$protFile,$outfile,$prots,@prots,%p
 $prots = '';
 if (@ARGV < 1){print_usage();exit 1;}
 GetOptions ('hmm=s' => \$hmmDir, 'in=s' => \$inDir, 'prot=s' => \$protDir, 'o=s' => \$outdir, 'h' => \$h, 't=i' => \$threads,'type=s' => \$type, 	'a' => \$append, 'scan' => \$scan);
+die print_usage() unless ((defined $hmmDir) && ($scan)) && defined $outdir || (defined $inDir && !($scan));
 if (eval $h){ print_usage();exit 1;}
 my $manager = Parallel::ForkManager -> new ( $threads );
 
