@@ -9,16 +9,16 @@ use File::Basename;
 use File::Temp;
 use Parallel::ForkManager;
 use Pod::Usage;
-#use network.pm;
+use network;
 my $prog = basename($0);
 my ($h,$append,$threads,$scan,$summary,$rpsdb,$hmmDir)=('0','0','10','0','0','/home/achande3/bin/db/cdd/Cdd','/home/achande3/hmm/hmm_profiles');
-my ($inDir,$protDir,$outdir,$hmmFile,$protFile,$outfile,$prots,@prots,%prots,@hits,$check,$type);
+my ($inDir,$protDir,$outdir,$hmmFile,$protFile,$outfile,$prots,@prots,%prots,@hits,$check,$type,$network);
 my @type = ( "hcp", "hydrolase", "lipase", "lysm", "ntpase", "vgrg" );
 $prots = '';
 if (@ARGV < 1){print_usage();exit 1;}
 GetOptions ('hmm=s' => \$hmmDir, 'in=s' => \$inDir, 'prot=s' => \$protDir, 'o=s' => \$outdir, 'h' => \$h, 
 				't=i' => \$threads,'type=s{1,}' => \$type, 'a' => \$append, 'scan' => \$scan, 'summary' => \$summary, 'db=s' => \$rpsdb,
-				'no-check' => \$check);
+				'no-check' => \$check, 'network' => \$network);
 if (defined $type){@type = split(/,/,$type);}
 #unless (defined $check)( die print_usage() unless ((defined $hmmDir) && ($scan)) && defined $outdir || (defined $inDir && !($scan)));
 if (eval $h){ print_usage();exit 1;}
@@ -151,6 +151,13 @@ foreach (@file){
 	else {next;}
 }
 $manager->wait_all_children;
+if(defined $network){
+	system(`mkdir -p $outdir/network/files`);
+	system(`cat $outdir/*summary.txt > $outdir/network/networkprots.fa`);
+	system(`/home/achande3/hmm/split_multifasta.pl --input_file $outdir/network/networkprots.fa --output_dir $outdir/network/files`);
+	build_network("$outdir/network/files","$outdir/network/matrix.tsv","$outdir/network/nodes.tsv");
+}
+
 exit 0;
 ##################
 sub print_usage{
